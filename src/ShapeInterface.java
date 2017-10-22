@@ -15,7 +15,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	private JComboBox<String> shapes;
 	private JComboBox<String> colors;
 	private JSlider redSlider, blueSlider, greenSlider;
-	private JTextField redQ, greenQ, blueQ;
+	private JTextField redQ, greenQ, blueQ, hexCode;
 	private JLabel rl, gl, bl;
 	
 	private JLabel dimLabels[] = {new JLabel("Size: "), 
@@ -25,7 +25,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	private JTextField dimFields[];
 	
 	private ImageIcon rIcon, bIcon, gIcon;
-	private int dimQty[] = {100,100,100,10};
+	private int dimQty[] = {300,300,300,10};
 	//private int shapeWidth, shapeHeight;
 	
 	public static void main(String[] args) {
@@ -81,13 +81,20 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 			dimFields[i].setPreferredSize(   new Dimension(40, 20) );
 		}
 
-		// R G  Text fields
+		// R G B Text fields & Hexcode
 		redQ   = new JTextField(  redSlider.getValue() + "");
 		greenQ = new JTextField(greenSlider.getValue() + "");
-		blueQ  = new JTextField( blueSlider.getValue() + "");		
+		blueQ  = new JTextField( blueSlider.getValue() + "");
+		
+
+		hexCode= new JTextField( "#" + hexVal(redSlider.getValue()) + 
+				                       hexVal(greenSlider.getValue()) + 
+				                       hexVal(blueSlider.getValue()) );
+		
 		redQ.setPreferredSize(   new Dimension(40, 20) );
 		greenQ.setPreferredSize( new Dimension(40, 20) );
 		blueQ.setPreferredSize(  new Dimension(40, 20) );
+		hexCode.setPreferredSize(new Dimension(60, 20) );
 		
 		redQ.setForeground(Color.RED);
 		greenQ.setForeground(Color.GREEN);
@@ -136,6 +143,11 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	 	topPanel2.add(new JLabel ("Blue:") );
 	 	topPanel2.add(blueQ);
 	 	
+	 	//topPanel2.add(new JLabel ("Hex Code: In Progress") );
+	 	topPanel2.add(new JLabel ("Hex Code:") );
+	 	topPanel2.add(hexCode);
+	 	
+	 	
 	 	// Default colors
 	 	/*"None", "Yellow", "Brown", "Gray", "Magenta", 
 				      "Orange", "Pink", "Cyan", "Purple", "Black", "White"*/
@@ -165,6 +177,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 		redQ.addActionListener(this);
 		greenQ.addActionListener(this);
 		blueQ.addActionListener(this);
+		hexCode.addActionListener(this);
 		
 		for(int i = 0; i < dimFields.length; i++ )
 		  dimFields[i].addActionListener(this);
@@ -282,20 +295,37 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 			}
 		}
 		
+		// if(a.getSource() == redQ ||a.getSource() == greenQ|| a.getSource() == blueQ){
 		
-		// Text to Slider
-		int redVal   =  Integer.parseInt(redQ.getText());
-		int greenVal =  Integer.parseInt(greenQ.getText());
-		int blueVal  =  Integer.parseInt(blueQ.getText());
+			// Text to Slider
+			// Check here for errors
+			int redVal   =  Integer.parseInt(redQ.getText());
+			int greenVal =  Integer.parseInt(greenQ.getText());
+			int blueVal  =  Integer.parseInt(blueQ.getText());
+			
 		
+			redSlider.setValue(redVal);	
+			greenSlider.setValue(greenVal);	
+			blueSlider.setValue(blueVal);	
 		
-		redSlider.setValue(redVal);	
-		greenSlider.setValue(greenVal);	
-		blueSlider.setValue(blueVal);	
-		
+		//}else if(a.getSource() == hexCode){
+			System.out.println("Hex to Slider");
+			
+			// Hex to Slider
+			// Check here for errors
+			int val[] = getRGB(hexCode.getText()); 
+			
+			System.out.println("RGB:"+val[0] +" "+ val[1] + " " + val[2]);
+			
+			redSlider.setValue(val[0]);	
+			greenSlider.setValue(val[1]);	
+			blueSlider.setValue(val[2]);
+
+		//}
 
 		
 		// Text to Drawing
+		// Check here for errors
 		for(int i = 0; i < dimFields.length; i++ )		
 			dimQty[i] = Integer.parseInt(dimFields[i].getText());			
 		
@@ -311,6 +341,9 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	
 	// Slider to text
 	public void stateChanged(ChangeEvent c) {
+		
+		//if(c.getSource() == redQ ||c.getSource() == greenQ|| c.getSource() == blueQ);
+		
 		String redVal   = Integer.toString(redSlider.getValue());
 		String greenVal = Integer.toString(greenSlider.getValue());
 		String blueVal  = Integer.toString(blueSlider.getValue());
@@ -320,8 +353,51 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 		greenQ.setText(greenVal);
 		blueQ.setText(blueVal);
 		
+		changeHex();
+
 		repaint();
 	}	
+
+	
+	// Change hex text
+	private void changeHex(){
+		
+		hexCode.setText("#" + hexVal(redSlider.getValue()) + 
+				              hexVal(greenSlider.getValue()) + 
+				              hexVal(blueSlider.getValue()));
+
+	}
+	
+	// Convert value to hex
+	private String hexVal(int v){
+		String newVal = Integer.toHexString(v);		
+		if(newVal.length() == 1) newVal = "0" + newVal;
+		
+		return newVal;
+	}
+	
+	//Convert Hex value into array of strings
+	private int[] getRGB(String hex){
+		char chars[] = hex.toCharArray();
+		
+		/*
+		for(int i =0;i<chars.length;i++)
+		  System.out.println(i+": " +chars[i] + " b4");
+		for(int i =0;i < c.length;i++)
+			  System.out.println(i+": " +c[i]);
+		*/
+		
+	
+		int r1 = (int) Long.parseLong(chars[1]+""+chars[2], 16);  // R
+		int r2 = (int) Long.parseLong(chars[3]+""+chars[4], 16);  // G
+		int r3 = (int) Long.parseLong(chars[5]+""+chars[6], 16);  // B
+		
+		int c[] = {r1,r2,r3};
+		
+
+		
+		return c;
+	}
 	
 	public void removeAll(){
 		
