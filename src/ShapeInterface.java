@@ -10,7 +10,7 @@ import javax.swing.event.*;
 public class ShapeInterface extends JComponent implements ActionListener,ChangeListener {
 
 	private JFrame fr;
-	private JPanel bottomPanel, topPanel1, topPanel2, topPanel3,  topOuterPanel;
+	private JPanel bottomPanel, bottomOuterPanel, topPanel1, topPanel2, topPanel3,  topOuterPanel, warPanel;
 	private JButton test;
 	private JComboBox<String> shapes;
 	private JComboBox<String> colors;
@@ -23,6 +23,9 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 			                      new JLabel("Height: "), 
 			                      new JLabel("Corner Arc: ")};
 	private JTextField dimFields[];
+	
+	private String prevHex;
+	private JLabel warning;
 	
 	private ImageIcon rIcon, bIcon, gIcon;
 	private int dimQty[] = {300,300,300,10};
@@ -44,7 +47,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	public ShapeInterface(){
 		loadImages();
 		
-		String[] s = {"Square", "Circle","Rectangle", "Rounded Rect", "Polygon"};
+		String[] s = {"Square", "Circle","Rectangle", "Rounded Rect", "Polygon (not yet available)"};
 		String[] c = {"None", "Yellow", "Brown", "Gray", "Magenta", 
 				      "Orange", "Pink", "Cyan", "Purple", "Black", "White"};
 		shapes = new JComboBox<String>(s);
@@ -55,10 +58,12 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 		
 		fr = new JFrame();
 		bottomPanel = new JPanel();
+		bottomOuterPanel = new JPanel();
 		topPanel2  = new JPanel();
 		topPanel1  = new JPanel();
 		topPanel3  = new JPanel();
 		topOuterPanel  = new JPanel();
+		warPanel = new JPanel();
 		
 	    fr.setTitle("Simple Slider");
 		fr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  //Close window on exit
@@ -90,6 +95,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 		hexCode= new JTextField( "#" + hexVal(redSlider.getValue()) + 
 				                       hexVal(greenSlider.getValue()) + 
 				                       hexVal(blueSlider.getValue()) );
+		warning = new JLabel("afjoiafjowafjaowjewaoj");
 		
 		redQ.setPreferredSize(   new Dimension(40, 20) );
 		greenQ.setPreferredSize( new Dimension(40, 20) );
@@ -112,6 +118,8 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	 	
 	 	bottomPanel.add(bl);
 	 	bottomPanel.add(blueSlider);
+	 	
+	 	
 	 	
 
 	 	// Shapes
@@ -148,6 +156,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	 	topPanel2.add(hexCode);
 	 	
 	 	
+	 	
 	 	// Default colors
 	 	/*"None", "Yellow", "Brown", "Gray", "Magenta", 
 				      "Orange", "Pink", "Cyan", "Purple", "Black", "White"*/
@@ -156,15 +165,23 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	 	colors.setBackground(Color.WHITE);
 	 	topPanel3.add(new JLabel("Default Color: "));
 	 	topPanel3.add(colors);
-	 			
+	 	
+	 	warPanel.add(new JLabel("WARNING: "));
+	 	warPanel.add(warning);
+	 	
 		topOuterPanel.add(topPanel1);
 		topOuterPanel.add(topPanel2);
 		topOuterPanel.add(topPanel3);
+		topOuterPanel.add(warPanel);
 	 	
 		fr.getContentPane().add(this);    			    
 		
+		// Extra paneling because I may need to add something else here
+		bottomOuterPanel.add(bottomPanel);
+		
 		fr.add(topOuterPanel,  BorderLayout.NORTH); 
-		fr.add(bottomPanel,  BorderLayout.SOUTH); 
+		fr.add(bottomOuterPanel,  BorderLayout.SOUTH); 
+			
 
 		fr.setVisible(true);		
 		
@@ -187,6 +204,9 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	    fr.requestFocusInWindow();
 
 		test.addActionListener(this);
+		
+		warPanel.setVisible(false);
+		prevHex = hexCode.getText();
 				
 	}
 	
@@ -231,7 +251,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 	  	  g.fillRoundRect(fr.getWidth()/2 - dimQty[1]/2, fr.getHeight()/2 - dimQty[2]/2 - topOuterPanel.getHeight(), 
 	  			dimQty[1], dimQty[2], dimQty[3], dimQty[3]);
 	  	  
-		}else if(shapes.getSelectedItem() == "Polygon"){
+		}else if(shapes.getSelectedItem() == "Polygon (not yet available)"){
 			
 		}
 	}
@@ -309,10 +329,13 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 			blueSlider.setValue(blueVal);	
 		
 		//}else if(a.getSource() == hexCode){
-			System.out.println("Hex to Slider");
+			//System.out.println("Hex to Slider");
+			
 			
 			// Hex to Slider
 			// Check here for errors
+			
+			checkHex();
 			int val[] = getRGB(hexCode.getText()); 
 			
 			System.out.println("RGB:"+val[0] +" "+ val[1] + " " + val[2]);
@@ -336,6 +359,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 		
 		
 		repaint();
+		//prevHex = hexCode.getText();
 
 	}
 	
@@ -357,6 +381,48 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 
 		repaint();
 	}	
+	
+	public void checkHex(){
+		
+		String code = hexCode.getText().toLowerCase();	
+		String finalHex = "";
+		
+		// Make sure length of string and first char are appropriate
+		// If string too long, shorten it,  else use previous 
+		if(code.length() > 7 ){
+			System.out.println(code.length());
+			String c = code;
+			code = c.substring(0, 7);
+			warning.setText("Hex Code too Long");
+			warPanel.setVisible(true);
+		}		
+		
+	    if(code.length() < 7 || code.charAt(0) != '#'){
+			finalHex = prevHex;
+			warning.setText("Invalid Hex Code");
+			warPanel.setVisible(true);
+		}else		
+			// Check to make sure all characters are in hex
+			for(int ch = 1; ch < code.length(); ch++)		
+				if( !(Character.isDigit(code.charAt(ch)) 
+						|| code.charAt(ch) == 'a' 					                                    
+						|| code.charAt(ch) == 'b'					                                    
+						|| code.charAt(ch) == 'c'		                                    
+						|| code.charAt(ch) == 'd'                      
+						|| code.charAt(ch) == 'e'    
+						|| code.charAt(ch) == 'f')  ){				
+					finalHex = prevHex;
+					warning.setText("Invalid Characters in Hex Code");
+					warPanel.setVisible(true);
+				}else{
+					finalHex = code;
+					warPanel.setVisible(false);
+				}
+		
+		hexCode.setText(finalHex);
+		//warPanel.setVisible(true);
+
+	}
 
 	
 	// Change hex text
@@ -367,6 +433,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 				              hexVal(blueSlider.getValue()));
 
 	}
+	
 	
 	// Convert value to hex
 	private String hexVal(int v){
@@ -394,8 +461,7 @@ public class ShapeInterface extends JComponent implements ActionListener,ChangeL
 		
 		int c[] = {r1,r2,r3};
 		
-
-		
+	
 		return c;
 	}
 	
