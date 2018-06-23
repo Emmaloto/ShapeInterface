@@ -7,13 +7,11 @@ With this program, you can
 - See the resulting value and hex code for a particular RGB value.
 - See the resulting value and RGB values for a particular hex value.
 - Select color using sliders and see RGB and hex values.
-- Fill in color for different shapes, which are square, Rectangle, Circle and rounded rectangle.
+- Fill in color for different shapes -> square, Rectangle, Circle, polygon and rounded rectangle.
 - Change dimensions for shapes.
 - Choose from some default colors.
+- Save screen to png file.
 
 In the near future, I am hoping to add the following functions:
-
-- Error checking to make sure invalid characters do not affect the program
 - Add Alpha channel
-- Save shape to png without background
-- Add more shapes, like polygons
+
